@@ -32,6 +32,7 @@
 
 #include "timer.h"
 
+#include <SDL.h>
 
 
 volatile uint32 g_timerGUI = 0;                                      /*!< Tick counter. Increases with 1 every tick when Timer 1 is enabled. Used for GUI. */
@@ -177,7 +178,7 @@ void SleepAndProcessBackgroundTasks(void)
 		Sleep(2); /* TODO : use a semaphore */
 #else
 		/* POSIX */
-		pause();	/* wait for a signal to happen */
+		SDL_Delay(1);	/* wait for a signal to happen */
 		/* another signal can have been triggered,
 		 * ALSA sound is using SIGIO for triggering callbacks */
 #endif

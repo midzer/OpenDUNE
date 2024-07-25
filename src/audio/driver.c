@@ -17,6 +17,8 @@
 #include "../timer.h"
 #include "../inifile.h"
 
+#include <SDL.h>
+
 static bool s_driverInstalled[16];
 static bool s_driverLoaded[16];
 
@@ -167,8 +169,9 @@ void Drivers_All_Init(void)
 	Drivers_Reset();
 
 	// Must call SDL_InitSubSystem() before enabling MIDI.
-	g_enableVoices = Drivers_Voice_Init(g_enableVoices);
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) return;
 	g_enableSoundMusic = Drivers_SoundMusic_Init(g_enableSoundMusic);
+	g_enableVoices = Drivers_Voice_Init(g_enableVoices);
 }
 
 bool Driver_Music_IsPlaying(void)

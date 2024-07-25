@@ -75,6 +75,8 @@
 #include "rev.h"
 #endif
 
+#include <emscripten.h>
+
 
 const char *window_caption = "OpenDUNE - v0.9";
 
@@ -990,7 +992,7 @@ static void GameLoop_Main(void)
 
 	GUI_Mouse_Show_Safe();
 
-	g_canSkipIntro = File_Exists_Personal("ONETIME.DAT");
+	g_canSkipIntro = true;//File_Exists_Personal("ONETIME.DAT");
 
 	for (;; sleepIdle()) {
 		if (g_gameMode == GM_MENU) {
@@ -1245,6 +1247,7 @@ int SDL_main(int argc, char **argv)
 int main(int argc, char **argv)
 #endif /* __APPLE__ */
 {
+	emscripten_set_main_loop(GameLoop_Main, 0, 0);
 	bool commit_dune_cfg = false;
 	VideoScaleFilter scale_filter = FILTER_NEAREST_NEIGHBOR;
 	int scaling_factor = 2;

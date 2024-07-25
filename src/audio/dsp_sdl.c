@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include "types.h"
 #include "../os/endian.h"
 #include "../os/error.h"
@@ -21,14 +22,15 @@ static uint32 s_dataLen;	// size of the allocated buffer
 
 static SDL_AudioSpec s_spec;
 
-static void DSP_Callback(void *userdata, Uint8 *stream, int len)
+//static void DSP_Callback(void *userdata, Uint8 *stream, int len)
+static void DSP_Callback(int channel, void* stream, int len, void* userdata)
 {
 	VARIABLE_NOT_USED(userdata);
 
 	if (s_status == 0 || s_bufferLen == 0 || s_buffer == NULL) {
 		/* no more sample to play : */
-		memset(stream, 0x80, len);	/* fill buffer with silence */
-		SDL_PauseAudio(1);	/* stop playback */
+		//memset(stream, 0x80, len);	/* fill buffer with silence */
+		//SDL_PauseAudio(1);	/* stop playback */
 		return;
 	}
 
@@ -38,7 +40,7 @@ static void DSP_Callback(void *userdata, Uint8 *stream, int len)
 		s_buffer += len;
 	} else {
 		memcpy(stream, s_buffer, s_bufferLen);
-		memset(stream + s_bufferLen, 0x80, len - s_bufferLen);	/* fill buffer end with silence */
+		//memset(stream + s_bufferLen, 0x80, len - s_bufferLen);	/* fill buffer end with silence */
 		s_bufferLen = 0;
 		s_buffer = NULL;
 		s_status = 0;
@@ -47,7 +49,7 @@ static void DSP_Callback(void *userdata, Uint8 *stream, int len)
 
 void DSP_Stop(void)
 {
-	SDL_PauseAudio(1);
+	//SDL_PauseAudio(1);
 
 	s_bufferLen = 0;
 	s_buffer = NULL;
@@ -69,13 +71,15 @@ void DSP_Uninit(void)
 
 bool DSP_Init(void)
 {
-	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) return false;
+	//if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) return false;
 
 	s_spec.freq     = MIX_OUTPUT_FREQUENCY;
 	s_spec.format   = MIX_OUTPUT_FORMAT;
 	s_spec.channels = MIX_OUTPUT_CHANNELS;
 	s_spec.samples  = MIX_BUFFER_SIZE;
-	s_spec.callback = DSP_Callback;
+	//s_spec.callback = DSP_Callback;
+
+	Mix_QuerySpec(&s_spec.freq, &s_spec.format, &s_spec.channels);
 
 	s_bufferLen = 0;
 	s_buffer = NULL;
@@ -83,9 +87,13 @@ bool DSP_Init(void)
 	s_data = NULL;
 	s_dataLen = 0;
 
-	if (SDL_OpenAudio(&s_spec, &s_spec) != 0) return false;
+	//if (SDL_OpenAudio(&s_spec, &s_spec) != 0) return false;
 
-	return (SDL_GetAudioStatus() != 0);
+	//return (SDL_GetAudioStatus() != 0);
+
+	Mix_RegisterEffect(MIX_CHANNEL_POST, DSP_Callback, NULL, NULL);
+
+	return true;
 }
 
 /**
@@ -148,7 +156,7 @@ void DSP_Play(const uint8 *data)
 
 	s_buffer = s_data;
 	s_status = 2;
-	SDL_PauseAudio(0);
+	//SDL_PauseAudio(0);
 }
 
 uint8 DSP_GetStatus(void)

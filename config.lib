@@ -859,7 +859,7 @@ make_cflags_and_ldflags() {
 	make_compiler_cflags "$cc_build" "CFLAGS_BUILD" "LDFLAGS_BUILD" "FEATURES_BUILD"
 	make_compiler_cflags "$cc_host" "CFLAGS" "LDFLAGS" "FEATURES"
 
-	CFLAGS="$CFLAGS -D$os -I$ROOT_DIR/include"
+	CFLAGS="$CFLAGS -D$os -I$ROOT_DIR/include -D_XOPEN_SOURCE=700"
 
 	if [ "$enable_debug" = "0" ]; then
 		# No debug, add default stuff
@@ -874,7 +874,7 @@ make_cflags_and_ldflags() {
 		elif [ "$os" = "HAIKU" -a $cc_version -lt 40 ] ; then
 			CFLAGS="-O2 -fomit-frame-pointer $CFLAGS"
 		else
-			CFLAGS="-O2 -fomit-frame-pointer -Wno-variadic-macros $CFLAGS"
+			CFLAGS="-O3 -flto -fno-exceptions -fno-rtti -sUSE_SDL_MIXER=2 -fomit-frame-pointer -Wno-variadic-macros $CFLAGS"
 		fi
 	else
 		OBJS_SUBDIR="debug"
